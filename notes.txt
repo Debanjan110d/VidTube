@@ -24,3 +24,9 @@
                 .env.*
                 notes.txt
 4.create src folder in the root directory
+5. Then run this command(Try to use bash terminal) to create all the folders in src:
+    cd src
+    mkdir controllers db middlewares models routes utils
+6.Then create some files in src :(using touch command):
+     touch app.js index.js constants.js .env .env.sample
+
