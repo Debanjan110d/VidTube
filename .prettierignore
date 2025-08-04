@@ -1,0 +1,9 @@
+/.vscode
+/node_modules
+./distribution
+
+
+*.env
+.env
+.env.*
+notes.txt
