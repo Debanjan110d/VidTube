@@ -1,0 +1,26 @@
+1. npm init --y // -y means yes to all questions(Do not forget to change the type form "common" to "module" in the package.json file)
+2. npm i -d // Means download dependencies
+3. npm i -D // Means download dev dependencies 
+ in this you should install nodemon and prettier
+    nodemon: for live server and continously refresh it automatically
+    prettier: for code formatting (create a " .prettierrc " file in the root directory  ; its a rc file)
+            in this file you can write your code formatting preferences like 
+            {
+                "singleQuote": false,
+                "bracketSpacing": true,
+                "tabWidth": 2,
+                "trailingComma": "es5",
+                "semi": true
+            }
+        then create prettierignore file in the root directory(this file is used to ignore files that are not to be formatted)
+            in this file you can write the name of the files that are not to be formatted like:
+                /.vscode
+                /node_modules
+                ./distribution
+
+
+                *.env
+                .env
+                .env.*
+                notes.txt
+4.create src folder in the root directory

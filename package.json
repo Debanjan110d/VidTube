@@ -1,0 +1,22 @@
+{
+  "name": "dev_tube",
+  "version": "1.0.0",
+  "description": "A project inspired by youtube",
+  "keywords": [
+    "nodejs",
+    "mongoose",
+    "backend",
+    "exprss"
+  ],
+  "license": "ISC",
+  "author": "Debanjan Dutta",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10",
+    "prettier": "^3.6.2"
+  }
+}
