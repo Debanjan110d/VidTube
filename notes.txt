@@ -29,4 +29,27 @@
     mkdir controllers db middlewares models routes utils
 6.Then create some files in src :(using touch command):
      touch app.js index.js constants.js .env .env.sample
+7.Create a index.js file in db folder:
+    touch index.js(purpose is to have a database connection)
+8.Create some files in models folder:
+     touch comment.models.js like.models.js playlist.models.js subscriptions.models.js tweet.models.js videos.models.js
+9.Installing Express:
+    npm i express
+10.Installing Mongoose:
+    npm i mongoose
+11.Test the code is woriking or not by addin g a simple console.log("Hello World") in the index.js file 
+12. Now to run the index.js file We need to setup a few things in the package.json file:
+    "scripts": {
+        start: "node src/index.js",
+    } 
+13.Now we will create the main cocmmand to run the index.js file:
+    "scripts": {
+        "dev": "nodemon src/index.js"
+    }
+14.To run these use the follwing command wichever you like :
+    npm run dev
+
+    |or|
+
+    npm dev
 
