@@ -1,7 +1,8 @@
 1. npm init --y // -y means yes to all questions(Do not forget to change the type form "common" to "module" in the package.json file)
 2. npm i -d // Means download dependencies
 3. npm i -D // Means download dev dependencies 
- in this you should install nodemon and prettier
+ in this you should install nodemon and prettier //the command will look like this :
+       npm i -D nodemon prettier
     nodemon: for live server and continously refresh it automatically
     prettier: for code formatting (create a " .prettierrc " file in the root directory  ; its a rc file)
             in this file you can write your code formatting preferences like 
