@@ -53,3 +53,18 @@
 
     npm dev
 
+15. Forgot to add .env file :(It will be in the main folder not in the src folder )
+    touch .env
+
+16.NOw install dotenv:(To tell express to use the .env file)
+    npm i dotenv
+       then add this in the app.js :
+       import dotenv from 'dotenv'
+       dotenv.config({
+           path:"./.env"
+       })
+        there fore change the port variable to process.env.PORT:
+            const PORT =  process.env.PORT || 5000
+*From here on the code will be in there files 
+
+15.Go to app.js adn write some code 
