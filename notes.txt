@@ -66,6 +66,9 @@
        })
         there fore change the port variable to process.env.PORT:
             const PORT =  process.env.PORT || 5000
+
+17. Install cors package:(to allow cross origin resource sharing andmentioning the people who cna share the data with us)
+    npm i cors
 *From here on the code will be in there files 
 
 15.Go to app.js adn write some code 
