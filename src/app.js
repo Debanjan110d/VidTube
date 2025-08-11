@@ -11,7 +11,7 @@ app.use(
         // Allow requests only from the domain specified in CORS_ORIGIN environment variable
         // This prevents unauthorized websites from accessing our API
         // Example: CORS_ORIGIN=http://localhost:3000 for development
-        origin: process.env.CORS_ORIGIN,
+        origin: process.env.CORS_ORIGIN,//This is one isjust a variable thats value is set in the .env file
 
         // Allow cookies and authorization headers to be sent with cross-origin requests
         // Essential for authentication - enables frontend to send auth tokens/cookies
@@ -20,5 +20,11 @@ app.use(
     })
 )
 
+//We will also add some express middlewares to make it more secure 
+app.use(express.json({ limit: '16kb' }))
+app.use(express.urlencoded({ extended: true, limit: '16kb' }))//Extended: true means the latest version of express will be used to encode the url like the the spaces will be encoded as %20 instead of +
+
+//We will be serving some static files
+app.use(express.static('public'))
 
 export { app }

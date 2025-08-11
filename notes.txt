@@ -71,4 +71,14 @@
     npm i cors
 *From here on the code will be in there files 
 
-15.Go to app.js adn write some code 
+1.Go to app.js adn write some code 
+
+2.In .env fie write the port number and these:
+    PORT = 8000
+     CORS_ORIGIN =* This * means allowing everything thats noot a good Idea 
+     CORS_ORIGIN =http://localhost:8000 To make it more secure in the development seceniro (Totallyt depends on your needs)
+     Also add the frontend url here, to make it more secure in the future
+3.add a public folder in the root directry to add the static files like images and videos:
+    mkdir public
+    also do not forget to give them permisssion them thorugh the app.js :
+    app.use(express.static("public"))
