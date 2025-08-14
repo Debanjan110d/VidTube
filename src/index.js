@@ -1,8 +1,9 @@
 import dotenv from 'dotenv'
 import { app } from './app.js'
+import connectDB from './db/index.js'
 
 dotenv.config({
-    path: './.env'
+    path: './src/.env'
 })
 
 /* This line of code is setting the value of the `PORT` constant. It is using the logical OR (`||`)
@@ -12,6 +13,15 @@ falsy), then `PORT` will default to 5000. This allows the server to run on the p
 environment variable `PORT`, or default to port 5000 if no specific port is provided. */
 const PORT = process.env.PORT || 5000 // 5000 is the default port
 
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`)
-})
+
+
+connectDB()
+    .then(() => {
+        app.listen(PORT, () => {
+            console.log(`Server is running on port ${PORT}`)
+        })
+    })
+    .catch(err => console.log("MongoDB connection error :    ", err))
+
+
+

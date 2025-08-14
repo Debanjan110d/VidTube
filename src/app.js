@@ -20,6 +20,8 @@ app.use(
     })
 )
 
+//common Middlewares
+
 //We will also add some express middlewares to make it more secure 
 app.use(express.json({ limit: '16kb' }))
 app.use(express.urlencoded({ extended: true, limit: '16kb' }))//Extended: true means the latest version of express will be used to encode the url like the the spaces will be encoded as %20 instead of +
