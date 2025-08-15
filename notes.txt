@@ -156,9 +156,188 @@
     - Visit http://localhost:8000 to test server
     - Check TROUBLESHOOTING.md if issues persist
 
-23. **NEXT STEPS**:
+23. **ASYNCHANDLER UTILITY CREATED** (Higher-Order Function for Error Handling):
+    
+    A) **File Created**: src/utils/asyncHandler.js
+       Purpose: Eliminates try-catch blocks in every async route handler
+    
+    B) **What is a Higher-Order Function?**:
+       - A function that takes another function as argument OR returns a function
+       - asyncHandler does BOTH: takes requestHandler function, returns enhanced function
+       - Enables function composition and code reuse
+    
+    C) **How asyncHandler Works**:
+       ```javascript
+       const asyncHandler = (requestHandler) => {
+           return (req, res, next) => {
+               Promise.resolve(requestHandler(req, res, next)).catch((err) => next(err));
+           };
+       }
+       ```
+    
+    D) **Step-by-Step Execution**:
+       1. Takes requestHandler function as parameter (HOF concept - function as argument)
+       2. Returns new function with (req, res, next) signature (HOF concept - function as return)
+       3. Wraps requestHandler in Promise.resolve() for consistent error handling
+       4. .catch() automatically passes any errors to Express error middleware
+       5. Uses closure to remember the original requestHandler function
+    
+    E) **Without asyncHandler (Traditional - Repetitive)**:
+       ```javascript
+       const getUser = async (req, res, next) => {
+           try {
+               const user = await User.findById(req.params.id);
+               res.json(user);
+           } catch (error) {
+               next(error); // Manual error handling in EVERY function
+           }
+       };
+       ```
+    
+    F) **With asyncHandler (Clean - No Repetition)**:
+       ```javascript
+       const getUser = asyncHandler(async (req, res) => {
+           const user = await User.findById(req.params.id);
+           res.json(user);
+           // No try-catch needed! asyncHandler handles errors automatically
+       });
+       ```
+    
+    G) **Higher-Order Function Concepts Demonstrated**:
+       - Function Composition: Combining error handling with business logic
+       - Abstraction: Hiding complex error handling behind simple interface
+       - Decorator Pattern: Adding functionality to existing functions
+       - Closure: Returned function remembers requestHandler parameter
+       - Code Reusability: Write error handling once, use everywhere
+    
+    H) **How to Use in Controllers**:
+       1. Import: import { asyncHandler } from '../utils/asyncHandler.js';
+       2. Wrap controllers: const myController = asyncHandler(async (req, res) => { ... });
+       3. Use in routes: router.get('/path', myController);
+       4. All errors automatically handled!
+    
+    I) **Why Promise.resolve() is Used**:
+       - Wraps both async and sync functions in Promise for consistent handling
+       - Catches thrown errors and rejected Promises uniformly
+       - Ensures .catch() always intercepts errors
+       - Passes errors to Express error middleware via next(err)
+
+24. **APIERROR UTILITY CREATED** (Custom Error Class for Standardized Error Handling):
+    
+    A) **File Created**: src/utils/apiError.js
+       Purpose: Create consistent, structured error objects across the application
+    
+    B) **Key Learning - JavaScript's Built-in Error Class**:
+       QUESTION: "Does Error class already exist as a child class?"
+       ANSWER: No! Error is JavaScript's BUILT-IN class, not something we created
+       
+       - Error is a native JavaScript constructor function/class
+       - Available globally in all JavaScript environments (browser, Node.js)
+       - Provides standard error properties: message, name, stack
+       - Other built-in error types: TypeError, ReferenceError, SyntaxError, etc.
+    
+    C) **Class Inheritance Concept**:
+       ```javascript
+       class ApiError extends Error {  // Extending JavaScript's built-in Error class
+           constructor(statusCode, message = "Something went wrong", errors = [], stack = "") {
+               super();  // MUST call super() when extending a class
+               // Custom properties added to built-in Error functionality
+           }
+       }
+       ```
+    
+    D) **Why super() is Required**:
+       - When extending any class (especially built-in classes), must call super()
+       - super() calls the parent class constructor (Error constructor)
+       - Initializes inherited properties and methods from Error class
+       - Without super(), you get an error: "Must call super constructor"
+    
+    E) **What is Stack Trace?**:
+       QUESTION: "What is this stack?"
+       ANSWER: Stack trace is a debugging tool showing the call chain that led to an error
+       
+       Components of Stack Trace:
+       - Function names that were called
+       - File names where functions are located  
+       - Line numbers where each function was called
+       - Call order (most recent call at the top)
+       
+       Example Stack Trace:
+       ```
+       Error: User not found
+           at getUserById (/project/controllers/user.js:25:15)    ← Error occurred here
+           at /project/routes/user.js:12:8                       ← Called from here
+           at Layer.handle (/node_modules/express/lib/router/layer.js:95:5)
+       ```
+    
+    F) **Error.captureStackTrace() Explanation**:
+       ```javascript
+       if (stack) {
+           this.stack = stack;  // Use provided stack trace
+       } else {
+           Error.captureStackTrace(this, this.constructor);  // Generate new stack trace
+       }
+       ```
+       
+       - Built-in Node.js method for generating stack traces
+       - First parameter (this): The error object to attach stack to
+       - Second parameter (this.constructor): Excludes constructor from trace (cleaner output)
+       - Creates breadcrumb trail showing exactly where error originated
+    
+    G) **Custom Properties Added to Built-in Error**:
+       - statusCode: HTTP status code (404, 500, etc.)
+       - message: Error description (inherited from Error class)
+       - data: null (placeholder for additional data)
+       - success: false (indicates API failure)
+       - errors: Array of validation errors or multiple error messages
+       - stack: Stack trace for debugging (inherited and customizable)
+    
+    H) **Real-World Usage Examples**:
+       ```javascript
+       // Import the custom error class
+       import { ApiError } from '../utils/apiError.js';
+       
+       // Throw custom errors in controllers
+       throw new ApiError(404, "User not found");
+       throw new ApiError(400, "Invalid email format", ["Email is required"]);
+       throw new ApiError(500, "Database connection failed");
+       ```
+    
+    I) **Benefits of Custom Error Class**:
+       - Consistent error structure across entire application
+       - Automatic HTTP status codes for API responses
+       - Built-in success/failure indicators
+       - Support for multiple error messages
+       - Enhanced debugging with stack traces
+       - Standardized error handling in middleware
+
+25. **LEARNING SUMMARY - Object-Oriented Programming Concepts**:
+    
+    A) **Class Inheritance**: 
+       - Extending built-in JavaScript classes (Error)
+       - Using super() to call parent constructor
+       - Adding custom properties to inherited functionality
+    
+    B) **Error Handling Architecture**:
+       - asyncHandler: Wrapper for automatic error catching
+       - ApiError: Standardized error object creation
+       - Both work together for comprehensive error management
+    
+    C) **JavaScript Built-in Classes Understanding**:
+       - Error, TypeError, ReferenceError are native to JavaScript
+       - Not custom classes - they exist in the language itself
+       - Can be extended to create custom error types
+    
+    D) **Debugging Tools**:
+       - Stack traces for tracking error origins
+       - Error.captureStackTrace() for custom stack generation
+       - Understanding call chains and execution flow
+
+26. **NEXT STEPS**:
+    - Create ApiResponse utility class for success responses
     - Implement user authentication models
     - Set up API routes in routes/ folder
-    - Create controller functions
+    - Create controller functions using asyncHandler and ApiError
     - Add middleware for authentication/validation
     - Implement file upload for videos/images
+    - Create Express error middleware to handle ApiError objects
