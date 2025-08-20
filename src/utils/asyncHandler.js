@@ -122,4 +122,4 @@ const asyncHandler = (requestHandler) => {
  * // All errors automatically handled by asyncHandler!
  */
 
-export { AsyncHandler };
+export { asyncHandler };

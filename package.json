@@ -8,6 +8,14 @@
     "backend",
     "exprss"
   ],
+  "homepage": "https://github.com/Debanjan110d/https---github.com-Debanjan110d-VidTube#readme",
+  "bugs": {
+    "url": "https://github.com/Debanjan110d/https---github.com-Debanjan110d-VidTube/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Debanjan110d/https---github.com-Debanjan110d-VidTube.git"
+  },
   "license": "ISC",
   "author": "Debanjan Dutta",
   "type": "module",
@@ -17,14 +25,14 @@
     "start": "node src/index.js",
     "dev": "nodemon src/index.js"
   },
-  "devDependencies": {
-    "nodemon": "^3.1.10",
-    "prettier": "^3.6.2"
-  },
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
     "mongoose": "^8.17.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10",
+    "prettier": "^3.6.2"
   }
 }
