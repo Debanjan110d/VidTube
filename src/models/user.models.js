@@ -10,8 +10,43 @@ const userSchema = new Schema(// Schema is a constructor function that is used t
         username: {
             type: String,
             required: true,
-            unique: true
+            unique: true,
+            lowercase: true,
+            trim: true,
+            index: true
+
+        },
+        email: {
+            type: String,
+            required: true,
+            unique: true,
+            lowercase: true,
+            trim: true,
+
+        },
+        fullname: {
+            type: String,
+            required: true,
+            trim: true,
+            index: true,
+
         }
+        ,
+        avatar: {
+            type: String,//Cloudnary link
+            required: true,
+
+
+        },
+        coverimage: {
+            type: String,
+
+        }
+        ,
+        watch_history: {
+
+        }
+
 
 
 
