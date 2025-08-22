@@ -43,13 +43,28 @@ const userSchema = new Schema(// Schema is a constructor function that is used t
 
         }
         ,
-        watch_history: {
+        /* The `watch_history` field in the user schema is defining an array of objects where each object
+        contains a reference to a `Video` document in the database. */
+        watch_history: [
+            {
+                type: Schema.Types.ObjectId,
+                ref: "Video"
+            }
+        ],
+        password: {
+            type: String,
+            required: [true, 'Password is required'],
+            minlength: [6, 'Password must be at least 6 characters']
 
+        },
+
+        refreshToken: {
+            type: String
         }
 
-
-
-
+    },
+    {
+        timestamps: true//The documents will automatically gets the createdAt and updatedAt fields
     }
 )
 
