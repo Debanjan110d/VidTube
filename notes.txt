@@ -1332,7 +1332,95 @@
        ✅ Password verification workflows
        ✅ Middleware chain understanding
 
-52. **NEXT DEVELOPMENT PHASE**:
+52. **DEMO UPLOAD ROUTE CREATED** (August 25, 2025):
+    
+    A) **File Created**: src/routes/upload.route.js
+       Purpose: Demonstrate file upload workflow with Cloudinary integration
+    
+    B) **Routes Implemented**:
+       
+       1. **Demo Upload Endpoint** (`POST /api/v1/upload/demo-upload`):
+          ```javascript
+          // Simulates complete upload process
+          const cloudinaryResponse = await upload_cloudinary(localFilePath);
+          ```
+          
+          Features:
+          - Tests Cloudinary utility function
+          - Validates file existence before upload
+          - Returns Cloudinary URL and metadata
+          - Handles errors with proper status codes
+          - Demonstrates cleanup (file deletion after upload)
+       
+       2. **Upload Workflow Demo** (`POST /api/v1/upload/upload-workflow`):
+          ```javascript
+          // Educational endpoint explaining the complete process
+          ```
+          
+          Purpose:
+          - Documents the 6-step upload workflow
+          - Lists next implementation steps
+          - Explains multer integration requirements
+          - Provides development roadmap
+    
+    C) **Workflow Documentation**:
+       
+       Complete Upload Process:
+       1. Frontend sends file via form-data
+       2. Multer middleware saves to local temp folder
+       3. Cloudinary utility uploads file to cloud
+       4. Local temp file deleted automatically
+       5. Cloudinary URL saved to database
+       6. Response sent with public URL
+    
+    D) **Error Handling Implemented**:
+       - File existence validation
+       - Upload failure detection
+       - Proper HTTP status codes (400, 500)
+       - Descriptive error messages
+       - Try-catch blocks for safety
+
+53. **ROUTE INTEGRATION**:
+    
+    A) **App.js Updated**:
+       ```javascript
+       import uploadRoute from "./routes/upload.route.js"
+       app.use("/api/v1/upload", uploadRoute)
+       ```
+       
+       Available Endpoints:
+       - GET /api/v1/healthcheck → Server health check
+       - POST /api/v1/upload/demo-upload → Test file upload
+       - POST /api/v1/upload/upload-workflow → Workflow documentation
+    
+    B) **Testing Instructions**:
+       1. Create folder: `public/temp/`
+       2. Add demo file: `public/temp/demo-file.jpg`
+       3. Test endpoint: `POST /api/v1/upload/demo-upload`
+       4. Check response for Cloudinary URL
+
+54. **NEXT IMPLEMENTATION STEPS**:
+    
+    A) **Multer Integration** (File Upload Middleware):
+       ```bash
+       npm install multer
+       ```
+       
+       Purpose: Handle multipart/form-data from frontend
+       Configuration: Temp storage, file validation, size limits
+    
+    B) **Controller Development**:
+       - User avatar upload controller
+       - Video file upload controller  
+       - Thumbnail generation controller
+       - File validation middleware
+    
+    C) **Database Integration**:
+       - Save Cloudinary URLs to user/video models
+       - Update user avatar/cover image fields
+       - Store video metadata with file URLs
+
+55. **CURRENT PROJECT STATUS**:
     - Create ApiResponse utility class for success responses
     - Implement user authentication models
     - Set up API routes in routes/ folder

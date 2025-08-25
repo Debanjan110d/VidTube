@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors"
-
+import cookieParser from "cookie-parser";
 
 const app = express()
 
@@ -28,17 +28,20 @@ app.use(express.urlencoded({ extended: true, limit: '16kb' }))//Extended: true m
 
 //We will be serving some static files
 app.use(express.static('public'))
-
+app.use(cookieParser())
 
 //import routes
 
 import healthcheckRoute from "./routes/healthcheck.route.js"
+// import uploadRoute from "./routes/upload.route.js"
+
 app.use("/healthcheck", healthcheckRoute)
 
 
 //routes 
 
 app.use("/api/v1/healthcheck", healthcheckRoute)
+// app.use("/api/v1/upload", uploadRoute)
 
 
 export { app }
