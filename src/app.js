@@ -33,6 +33,7 @@ app.use(cookieParser())
 //import routes
 
 import healthcheckRoute from "./routes/healthcheck.route.js"
+import userRoute from "./routes/user.route.js"
 // import uploadRoute from "./routes/upload.route.js"
 
 app.use("/healthcheck", healthcheckRoute)
@@ -41,6 +42,7 @@ app.use("/healthcheck", healthcheckRoute)
 //routes 
 
 app.use("/api/v1/healthcheck", healthcheckRoute)
+app.use("/api/v1/user", userRoute)
 // app.use("/api/v1/upload", uploadRoute)
 
 
