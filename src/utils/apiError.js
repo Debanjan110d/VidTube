@@ -24,3 +24,5 @@ class ApiError extends Error {// Error Is a Build in Js Class
         }
     }
 }
+
+export { ApiError }

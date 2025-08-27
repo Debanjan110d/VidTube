@@ -1,6 +1,8 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/apiError.js";
-import { User } from "../models/user.model.js";
+import { User } from "../models/user.models.js";
+import { upload_cloudinary } from "../utils/cloudinary.js";
+import { ApiResponse } from "../utils/apiResponse.js"
 
 const registerUser = asyncHandler(async (req, res) => {
     //TODO
@@ -25,6 +27,34 @@ const registerUser = asyncHandler(async (req, res) => {
     }
 
     const avatar_local_path = req.files?.avatar[0]?.path
+    const cover_local_path = req.files?.coverImage[0]?.path
+
+    if (!avatar_local_path) {
+        throw new ApiError(400, "Avatar is required")
+    }
+
+    const avatar = await upload_cloudinary(avatar_local_path, "avatar")
+    if (cover_local_path) {
+        const coverImage = await upload_cloudinary(cover_local_path, "coverImage")
+    }
+
+    const user = await User.create({
+        fullname,
+        email,
+        username: username.toLowerCase(),
+        password,
+        avatar: avatar.secure_url,
+        coverImage: coverImage?.url || "",
+        watchHistory: []
+    })
+    const created_user = await User.findById(user._id).select("-password -refreshToken ")
+    if (!created_user) {
+        throw new Error("Something went wrong, Created user not found in database", "500");
+    }
+    res
+        .status(201)
+        .json(new ApiResponse(201, "User created successfully", created_user))
+
 })
 
 
