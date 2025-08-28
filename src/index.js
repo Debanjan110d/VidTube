@@ -6,16 +6,16 @@ dotenv.config({
     path: 'src/.env'
 })
 
-// Temporary hardcoded values for testing
-process.env.PORT = process.env.PORT || "8000";
-process.env.MONGO_URI = process.env.MONGO_URI || "mongodb+srv://huha:huha100@cluster0.cqo5rmk.mongodb.net";
-process.env.CORS_ORIGIN = process.env.CORS_ORIGIN || "http://localhost:3000";
+// Environment variable validation
+if (!process.env.MONGO_URI) {
+    console.error("❌ MONGO_URI environment variable is required!");
+    process.exit(1);
+}
 
 console.log("Environment variables loaded:");
-console.log("PORT:", process.env.PORT);
-console.log("MONGO_URI:", process.env.MONGO_URI ? "LOADED" : "NOT LOADED");
-console.log("CORS_ORIGIN:", process.env.CORS_ORIGIN);
-console.log("Test trigger for nodemon restart...");
+console.log("PORT:", process.env.PORT || "8000");
+console.log("MONGO_URI:", process.env.MONGO_URI ? "✅ LOADED" : "❌ NOT LOADED");
+console.log("CORS_ORIGIN:", process.env.CORS_ORIGIN || "http://localhost:3000");
 
 /* This line of code is setting the value of the `PORT` constant. It is using the logical OR (`||`)
 operator to check if the `process.env.PORT` variable has a value. If `process.env.PORT` has a value

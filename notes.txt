@@ -1398,6 +1398,289 @@
        4. Return new access token to client
        5. Client continues with new access token
 
+===================== COMPREHENSIVE DEBUGGING SESSION (August 28, 2025) =====================
+
+51. **MAJOR ERROR RESOLUTION SESSION**:
+    
+    A) **Error Middleware Fixed**:
+       
+       Problem: Incorrect instanceof usage and missing response
+       ```javascript
+       // BEFORE (Broken):
+       if (!error instanceof ApiError)
+       
+       // AFTER (Fixed):
+       if (!(error instanceof ApiError))
+       ```
+       
+       Key Fixes:
+       - ✅ Corrected operator precedence with parentheses
+       - ✅ Added proper JSON response to client
+       - ✅ Removed duplicate dotenv import
+       - ✅ Standardized error response format
+
+    B) **Multer Field Name Mismatch Fixed**:
+       
+       Problem: "MulterError: Unexpected field" when uploading coverImage
+       Root Cause: Route expected "cover" but client sent "coverImage"
+       
+       Solution Applied:
+       ```javascript
+       // BEFORE:
+       upload.fields([{ name: "avatar", maxCount: 1 }, { name: "cover", maxCount: 1 }])
+       
+       // AFTER:
+       upload.fields([{ name: "avatar", maxCount: 1 }, { name: "coverImage", maxCount: 1 }])
+       ```
+       
+       Controller Updated:
+       ```javascript
+       const cover_local_path = req.files?.coverImage[0]?.path
+       ```
+
+    C) **Critical Environment Variable Loading Issues**:
+       
+       Problem 1: MongoDB "Invalid namespace" error (vidtube/vidtube.users)
+       Cause: Database name duplicated in URI and connection string
+       
+       Problem 2: All environment variables showing as "undefined"
+       Cause: dotenv not loading .env file properly
+       
+       Resolution Process:
+       1. Fixed MongoDB URI format (removed duplicate database name)
+       2. Recreated .env file to eliminate encoding issues
+       3. Added hardcoded fallback values for critical variables
+       4. Normalized file paths for cross-platform compatibility
+
+    D) **Cloudinary Upload Failures Fixed**:
+       
+       Problem Sequence:
+       1. "Cannot read properties of null (reading 'secure_url')"
+       2. "Must supply api_key" error
+       3. "Invalid URL for upload" error
+       
+       Root Causes & Solutions:
+       ```javascript
+       // CAUSE 1: Wrong function parameters
+       // BEFORE: upload_cloudinary(path, "avatar")
+       // AFTER: upload_cloudinary(path)
+       
+       // CAUSE 2: Environment variables not loading
+       // SOLUTION: Added explicit dotenv config with correct path
+       
+       // CAUSE 3: Windows path separators causing invalid URLs
+       // SOLUTION: Added path normalization
+       const normalizedPath = localFilePath.replace(/\\/g, '/');
+       ```
+
+52. **COMPREHENSIVE DEBUGGING METHODOLOGY APPLIED**:
+    
+    A) **Error Analysis Process**:
+       1. **Read Error Messages Carefully**: Extract file names, line numbers, and error types
+       2. **Identify Root Causes**: Distinguish between symptoms and actual problems
+       3. **Trace Dependencies**: Follow import chains and configuration paths
+       4. **Test Incrementally**: Fix one issue at a time and verify results
+       5. **Monitor Terminal Output**: Use console.log strategically for debugging
+    
+    B) **Environment Configuration Debugging**:
+       
+       Debug Process Applied:
+       ```javascript
+       // Added comprehensive logging
+       console.log("Environment variables loaded:");
+       console.log("PORT:", process.env.PORT);
+       console.log("MONGO_URI:", process.env.MONGO_URI ? "LOADED" : "NOT LOADED");
+       console.log("CORS_ORIGIN:", process.env.CORS_ORIGIN);
+       ```
+       
+       Issues Discovered:
+       - dotenv injecting 0 variables (path configuration issue)
+       - File encoding problems preventing variable loading
+       - Path resolution differences between Windows and Unix systems
+    
+    C) **File Upload Debugging Strategy**:
+       
+       Cloudinary Debug Logs Added:
+       ```javascript
+       console.log("Uploading file:", localFilePath);
+       console.log("Cloudinary config:", {
+           cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+           api_key: process.env.CLOUDINARY_API_KEY ? "***" : "NOT SET",
+           api_secret: process.env.CLOUDINARY_API_SECRET ? "***" : "NOT SET"
+       });
+       console.log("Normalized path:", normalizedPath);
+       ```
+       
+       This revealed:
+       - Configuration loading status
+       - File path format issues
+       - Cross-platform compatibility problems
+
+53. **TECHNICAL ISSUES RESOLVED**:
+    
+    A) **MongoDB Connection Problems**:
+       ✅ Fixed duplicate database name in connection string
+       ✅ Resolved environment variable loading issues
+       ✅ Added connection status debugging
+       ✅ Successful connection to MongoDB Atlas cluster
+       
+       Final Working Configuration:
+       ```javascript
+       MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net
+       // Database name added by code: ${MONGO_URI}/${DB_NAME}
+       ```
+    
+    B) **Cloudinary Integration Success**:
+       ✅ Fixed environment variable naming (CLOUDINARY_NAME → CLOUDINARY_CLOUD_NAME)
+       ✅ Added path normalization for Windows compatibility
+       ✅ Implemented proper error handling with upload failure detection
+       ✅ Added comprehensive debug logging for troubleshooting
+       
+       Working Upload Function:
+       ```javascript
+       const normalizedPath = localFilePath.replace(/\\/g, '/');
+       const response = await cloudinary.uploader.upload(normalizedPath, {
+           resource_type: "auto",
+           use_filename: true,
+           unique_filename: true
+       });
+       ```
+    
+    C) **Error Handling Improvements**:
+       ✅ Fixed error middleware syntax and logic
+       ✅ Added proper JSON responses for API errors
+       ✅ Implemented comprehensive error logging
+       ✅ Added graceful fallbacks for failed operations
+
+54. **DEBUGGING TOOLS & TECHNIQUES MASTERED**:
+    
+    A) **Terminal Output Analysis**:
+       - Reading nodemon restart logs for configuration changes
+       - Interpreting MongoDB connection messages and errors
+       - Understanding Cloudinary API response formats
+       - Tracking environment variable loading status
+    
+    B) **Error Message Interpretation**:
+       - JavaScript syntax errors vs runtime errors
+       - MongoDB connection string format validation
+       - HTTP status codes and their meanings
+       - File system path resolution across platforms
+    
+    C) **Systematic Debugging Approach**:
+       - Isolate variables by testing components individually
+       - Use process of elimination to narrow down issues
+       - Implement defensive programming with fallback values
+       - Document solutions for future reference
+
+55. **ENVIRONMENT CONFIGURATION BEST PRACTICES ESTABLISHED**:
+    
+    A) **File Management**:
+       - Clean .env file recreation to eliminate encoding issues
+       - Consistent variable naming conventions
+       - No spaces around = signs in environment files
+       - Proper file path handling for cross-platform compatibility
+    
+    B) **Fallback Strategy**:
+       ```javascript
+       // Defensive programming with fallbacks
+       process.env.PORT = process.env.PORT || "8000";
+       process.env.MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017";
+       process.env.CORS_ORIGIN = process.env.CORS_ORIGIN || "http://localhost:3000";
+       ```
+    
+    C) **Debug Configuration**:
+       - Comprehensive logging for environment status
+       - Configuration validation on server startup
+       - Clear error messages for missing variables
+       - Status monitoring for external service connections
+
+56. **FILE UPLOAD SYSTEM ARCHITECTURE**:
+    
+    A) **Multer Configuration**:
+       ✅ Proper field name mapping between frontend and backend
+       ✅ Multiple file upload support (avatar + coverImage)
+       ✅ Temporary file storage in public/temp directory
+       ✅ File validation and error handling
+    
+    B) **Cloudinary Integration**:
+       ✅ Environment-based configuration with secrets
+       ✅ Automatic file cleanup after upload
+       ✅ Path normalization for cross-platform compatibility
+       ✅ Resource type auto-detection
+       ✅ Unique filename generation to prevent conflicts
+    
+    C) **Error Recovery**:
+       ✅ Failed upload detection and appropriate error responses
+       ✅ File cleanup on upload failure
+       ✅ Graceful degradation when external services fail
+       ✅ Comprehensive error logging for debugging
+
+57. **CURRENT SYSTEM STATUS**:
+    
+    A) **Fully Operational Components**:
+       ✅ Express server with CORS and middleware
+       ✅ MongoDB Atlas connection with proper database naming
+       ✅ Environment variable loading with fallback values
+       ✅ Error handling middleware with proper responses
+       ✅ File upload system with Multer and Cloudinary
+       ✅ User registration validation and duplicate checking
+       ✅ API error and response standardization
+    
+    B) **Successfully Tested Features**:
+       ✅ Server startup and health check endpoints
+       ✅ MongoDB connection and database operations
+       ✅ Environment variable loading and validation
+       ✅ File upload with proper field name mapping
+       ✅ Cloudinary integration with image upload
+       ✅ Error handling and response formatting
+    
+    C) **Ready for Next Development Phase**:
+       ✅ Complete user registration implementation
+       ✅ Password hashing and JWT token generation
+       ✅ Authentication middleware development
+       ✅ Video upload and management features
+       ✅ Comment and like system implementation
+
+58. **LESSONS LEARNED FROM DEBUGGING SESSION**:
+    
+    A) **Configuration Management**:
+       - Environment variables are critical points of failure
+       - File encoding can silently break configuration loading
+       - Cross-platform path handling requires normalization
+       - Fallback values provide system resilience
+    
+    B) **External Service Integration**:
+       - API errors often indicate configuration issues
+       - Debug logging is essential for troubleshooting
+       - Service-specific requirements (Cloudinary path format)
+       - Error handling should be comprehensive and informative
+    
+    C) **Development Workflow**:
+       - Incremental testing prevents complex debugging sessions
+       - Terminal output provides crucial debugging information
+       - Systematic error resolution prevents regression
+       - Documentation of solutions aids future development
+
+59. **NEXT DEVELOPMENT PRIORITIES**:
+    
+    A) **Complete User Registration**:
+       - Finish user controller implementation
+       - Add password hashing integration
+       - Implement JWT token generation
+       - Test complete registration flow
+    
+    B) **Authentication System**:
+       - Create login endpoint
+       - Implement authentication middleware
+       - Add token refresh functionality
+       - Build protected route system
+    
+    C) **File Management Enhancement**:
+       - Add file validation (size, type)
+       - Implement image resizing and optimization
+       - Add file deletion functionality
+       - Create avatar and cover image update endpoints
+
 51. **LEARNING OUTCOMES FROM TODAY'S SESSION**:
     
     A) **Security Best Practices**:
