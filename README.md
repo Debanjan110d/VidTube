@@ -120,6 +120,24 @@ const existedUser = await User.findOne({
 - MongoDB `$or` operator for duplicate prevention
 - Consistent error handling with custom ApiError class
 
+### Route Setup & Debugging (August 27, 2025)
+
+**Recent Progress:**
+- Multer middleware (`upload`) exported as a named export and correctly imported in routes
+- User route file (`user.route.js`) set up with Express Router
+- Fixed export error: `SyntaxError: Export 'userRoute' is not defined in module` by ensuring router is declared before export
+- Fixed reference error: `ReferenceError: upload is not defined` by importing `upload` middleware
+
+**Debugging Tips:**
+- Always declare and initialize variables before exporting
+- Use named imports for named exports (e.g., `{ upload }`)
+- Read error messages for file and line number clues
+- Restart nodemon after making code changes
+
+**Next Steps:**
+- Implement user registration route logic
+- Continue improving error handling and validation in routes
+
 ## 🤝 Contributing
 
 1. Fork the repository

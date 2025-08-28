@@ -1010,19 +1010,19 @@
 
 41. **LEARNING MILESTONES ACHIEVED THIS SESSION**:
     
-    ✅ **Schema Field Implementation**:
+    A) **Schema Field Implementation**:
     - Successfully added 5+ fields with proper validation
     - Applied appropriate data types and constraints
     - Implemented indexing strategy for performance
     - Planned external service integration
     
-    ✅ **Database Design Understanding**:
+    B) **Database Design Principles**:
     - Unique constraints for data integrity
     - Required vs optional field decisions
     - Text processing (lowercase, trim) for consistency
     - Index placement for query optimization
     
-    ✅ **Validation Strategy**:
+    C) **Validation Strategy**:
     - Required validation on critical fields
     - Unique validation on identifying fields
     - Text formatting for data consistency
@@ -1121,6 +1121,7 @@
     A) **Naming Conventions Observed**:
        - Consistent use of camelCase for most fields
        - Some snake_case usage (watch_history)
+       - Mixed usage of plural/singular (videos, videoFile)
        - Model names follow PascalCase convention
        - File naming follows kebab-case pattern
     
@@ -1506,11 +1507,50 @@
        - Update user avatar/cover image fields
        - Store video metadata with file URLs
 
-55. **CURRENT PROJECT STATUS**:
-    - Create ApiResponse utility class for success responses
-    - Implement user authentication models
-    - Set up API routes in routes/ folder
-    - Create controller functions using asyncHandler and ApiError
-    - Add middleware for authentication/validation
-    - Implement file upload for videos/images
-    - Create Express error middleware to handle ApiError objects
+===================== ROUTES & DEBUGGING (August 27, 2025) =====================
+
+27. **USER ROUTE DEVELOPMENT & DEBUGGING**:
+
+    A) Multer Middleware Usage:
+       - Exported multer instance as named export:
+         ```javascript
+         export const upload = multer({ storage });
+         ```
+       - To use in routes, import with curly braces:
+         ```javascript
+         import { upload } from "../middlewares/multer.middleware.js";
+         ```
+
+    B) Router Setup:
+       - Defined Express router:
+         ```javascript
+         import { Router } from "express";
+         const userRoute = Router();
+         // ...define routes...
+         export { userRoute };
+         ```
+       - **Error Fixed:**
+         - `SyntaxError: Export 'userRoute' is not defined in module`
+         - Cause: Tried to export `userRoute` before declaring it
+         - Solution: Declare and initialize router before export
+
+    C) Common Terminal Errors & Fixes:
+       - `ReferenceError: upload is not defined`
+         - Cause: Used `upload` middleware without importing
+         - Solution: Import `upload` from multer.middleware.js
+       - `SyntaxError: Export 'userRoute' is not defined in module`
+         - Cause: Exported router before defining it
+         - Solution: Define router before export
+
+    D) Debugging Workflow:
+       - Read error message and file/line number
+       - Check for missing imports or undefined variables
+       - Ensure all exports are declared before exporting
+       - Restart nodemon after code changes
+
+28. **TODAY'S PROGRESS SUMMARY**:
+    - ✅ Multer middleware correctly exported and imported
+    - ✅ User route file set up with Express router
+    - ✅ Fixed export and reference errors in user.route.js
+    - ✅ Improved debugging workflow for terminal errors
+    - ⏳ Next: Implement user registration route logic
