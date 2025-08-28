@@ -3,8 +3,19 @@ import { app } from './app.js'
 import connectDB from './db/index.js'
 
 dotenv.config({
-    path: './src/.env'
+    path: 'src/.env'
 })
+
+// Temporary hardcoded values for testing
+process.env.PORT = process.env.PORT || "8000";
+process.env.MONGO_URI = process.env.MONGO_URI || "mongodb+srv://huha:huha100@cluster0.cqo5rmk.mongodb.net";
+process.env.CORS_ORIGIN = process.env.CORS_ORIGIN || "http://localhost:3000";
+
+console.log("Environment variables loaded:");
+console.log("PORT:", process.env.PORT);
+console.log("MONGO_URI:", process.env.MONGO_URI ? "LOADED" : "NOT LOADED");
+console.log("CORS_ORIGIN:", process.env.CORS_ORIGIN);
+console.log("Test trigger for nodemon restart...");
 
 /* This line of code is setting the value of the `PORT` constant. It is using the logical OR (`||`)
 operator to check if the `process.env.PORT` variable has a value. If `process.env.PORT` has a value

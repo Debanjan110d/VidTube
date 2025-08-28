@@ -33,9 +33,14 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Avatar is required")
     }
 
-    const avatar = await upload_cloudinary(avatar_local_path, "avatar")
+    const avatar = await upload_cloudinary(avatar_local_path)
+    if (!avatar) {
+        throw new ApiError(500, "Failed to upload avatar to Cloudinary")
+    }
+
+    let coverImage = null;
     if (cover_local_path) {
-        const coverImage = await upload_cloudinary(cover_local_path, "coverImage")
+        coverImage = await upload_cloudinary(cover_local_path)
     }
 
     const user = await User.create({
@@ -44,8 +49,8 @@ const registerUser = asyncHandler(async (req, res) => {
         username: username.toLowerCase(),
         password,
         avatar: avatar.secure_url,
-        coverImage: coverImage?.url || "",
-        watchHistory: []
+        coverImage: coverImage?.secure_url || "",
+        // watchHistory: []
     })
     const created_user = await User.findById(user._id).select("-password -refreshToken ")
     if (!created_user) {

@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors"
 import cookieParser from "cookie-parser";
 
+
 const app = express()
 
 // CORS (Cross-Origin Resource Sharing) Middleware Configuration
@@ -34,6 +35,7 @@ app.use(cookieParser())
 
 import healthcheckRoute from "./routes/healthcheck.route.js"
 import userRoute from "./routes/user.route.js"
+import { errorHandler } from "./middlewares/error.middleware.js";// This middleware is used for error handling 
 // import uploadRoute from "./routes/upload.route.js"
 
 app.use("/healthcheck", healthcheckRoute)
@@ -46,6 +48,8 @@ app.use("/api/v1/user", userRoute)
 // app.use("/api/v1/upload", uploadRoute)
 
 
+
+app.use(errorHandler)// This middleware is not mandetory but it is a good practice
 export { app }
 
 
