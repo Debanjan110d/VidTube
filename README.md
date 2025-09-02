@@ -58,16 +58,25 @@ project-yt/
 │   ├── app.js            # Express app configuration
 │   ├── constants.js      # Application constants
 │   ├── controllers/      # Route controllers
-│   │   └── user.controller.js  # User registration & auth logic
+│   │   ├── user.controller.js    # User auth & management logic
+│   │   └── healthcheck.controller.js  # Health check endpoint
 │   ├── db/              # Database configuration
 │   ├── middlewares/     # Custom middlewares
+│   │   ├── auth.middleware.js    # JWT authentication middleware
+│   │   ├── multer.middleware.js  # File upload middleware
+│   │   └── error.middleware.js   # Global error handler
 │   ├── models/          # MongoDB models
-│   │   └── user.models.js      # User schema definition
+│   │   ├── user.models.js        # User schema with auth methods
+│   │   ├── video.models.js       # Video schema
+│   │   └── ...other models
 │   ├── routes/          # API routes
+│   │   ├── user.route.js         # User authentication routes
+│   │   └── healthcheck.route.js  # Health check routes
 │   └── utils/           # Utility functions
-│       ├── apiError.js       # Custom error handling
-│       ├── apiResponse.js    # Standardized responses
-│       └── asyncHandler.js   # Async error wrapper
+│       ├── apiError.js           # Custom error handling
+│       ├── apiResponse.js        # Standardized responses
+│       ├── asyncHandler.js       # Async error wrapper
+│       └── cloudinary.js         # File upload utility
 ├── public/              # Static files
 └── package.json         # Dependencies and scripts
 ```
@@ -77,24 +86,42 @@ project-yt/
 ### ✅ Completed Features
 - **Project Setup**: Environment configuration, database connection
 - **Error Handling**: Custom ApiError class and asyncHandler utility
+- **User Authentication**: Complete registration, login, logout, and token refresh system
+- **JWT Middleware**: Authentication middleware for protected routes
+- **File Upload System**: Multer + Cloudinary integration for avatar/cover images
 - **User Validation**: Input validation for registration with comprehensive checks
 - **Duplicate Prevention**: Email and username uniqueness validation
-- **File Upload System**: Multer + Cloudinary integration for avatar/cover images
 - **Database Models**: User, Video, Comment, Like models with relationships
 - **Environment Management**: Robust dotenv configuration with fallbacks
+- **Cookie Security**: HttpOnly cookies with environment-based secure flags
+- **Token Management**: Access and refresh token generation with JWT
 
 ### 🔄 In Progress
-- **User Registration**: Complete registration flow with password hashing
-- **Authentication**: JWT token generation and verification
-- **File Management**: Image upload validation and processing
+- **Video Upload System**: Planning video model and upload endpoints
+- **User Profile Management**: Profile update and avatar change functionality
 
 ### 📋 Next Steps
-- Complete user registration endpoint
-- Implement login functionality
-- Add password reset capabilities
-- Build video upload system
+- Implement video upload and streaming functionality
+- Add comment and like systems for videos
+- Build playlist management features
+- Add search and recommendation systems
 
-### 🛠️ Recent Fixes (August 28, 2025)
+### 🛠️ Recent Fixes & Updates
+
+**September 2, 2025:**
+- **Authentication System**: Complete JWT-based authentication implementation
+- **Middleware Creation**: Built verifyJWT middleware for protected routes
+- **Route Protection**: Secured logout endpoint with authentication middleware
+- **Token Management**: Multiple token source support (cookies, body, headers)
+- **Cookie Security**: HttpOnly cookies with environment-based configuration
+
+**September 1, 2025:**
+- **User Authentication**: Implemented registration, login, logout, refresh token endpoints
+- **File Upload Integration**: Connected Cloudinary with user avatar/cover uploads
+- **JWT Implementation**: Access and refresh token generation with secure storage
+- **Error Enhancement**: Improved error handling across authentication flow
+
+**August 28, 2025:**
 - **Environment Loading**: Fixed dotenv configuration and variable loading issues
 - **MongoDB Connection**: Resolved duplicate database name in connection string
 - **Cloudinary Upload**: Fixed file path normalization for cross-platform compatibility

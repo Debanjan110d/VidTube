@@ -82,14 +82,31 @@ const registerUser = asyncHandler(async (req, res) => {
 })
 
 const logoutUser = asyncHandler(async (req, res) => {
-    //TODO
+
     await User.findByIdAndUpdate(
         //Need to come back here after middleware video 
-        //TODO
-        req.user._id, { refreshToken: "" }
-    )
+        await User.findByIdAndUpdate(
+            req.user._id,
+            {
+                set: {
+                    refreshToken: null
+                }
+            },
+            { new: true }
 
-    res.status(200).json(new ApiResponse(200, "Logout successful"))
+        )
+    )
+    const options = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+    }
+
+
+    res
+        .status(200)
+        .clearCookie("accessToken", options)
+        .clearCookie("refreshToken", options)
+        .json(new ApiResponse(200, {}, "Logout successful"))// { } means there is no data with us as its a empty object
 })
 
 const loginUser = asyncHandler(async (req, res) => {
@@ -188,5 +205,6 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 export {
     registerUser,
     loginUser,
-    refreshAccessToken
+    refreshAccessToken,
+    logoutUser
 }

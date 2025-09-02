@@ -4,6 +4,7 @@
 - [Common Startup Issues](#common-startup-issues)
 - [MongoDB Connection Problems](#mongodb-connection-problems)
 - [Environment Configuration Issues](#environment-configuration-issues)
+- [Authentication Issues](#authentication-issues)
 - [Prevention Best Practices](#prevention-best-practices)
 - [Quick Fixes](#quick-fixes)
 
@@ -198,6 +199,64 @@ cat src/.env
 
 ---
 
+## Authentication Issues
+
+### Issue 4: JWT Token Not Found
+
+**❌ Error:**
+```
+ApiError: Unauthorized
+```
+
+**Cause:**
+- Missing ACCESS_TOKEN_SECRET or REFRESH_TOKEN_SECRET in environment variables
+- Token not sent in cookies, body, or Authorization header
+- Malformed Authorization header
+
+**✅ Solution:**
+```env
+ACCESS_TOKEN_SECRET=your_very_long_secret_key_here
+REFRESH_TOKEN_SECRET=your_other_very_long_secret_key_here
+```
+
+### Issue 5: Cookie Not Set During Login
+
+**❌ Problem:**
+- User login successful but subsequent protected routes fail
+- Cookies not visible in browser developer tools
+
+**Cause:**
+- Missing `cookie-parser` middleware
+- Incorrect cookie options (secure flag issues)
+
+**✅ Solution:**
+```javascript
+// In app.js
+import cookieParser from "cookie-parser";
+app.use(cookieParser());
+
+// In controller
+const options = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production", // false in development
+    sameSite: "lax" // or "none" for cross-origin
+}
+```
+
+### Issue 6: Authorization Header Format
+
+**❌ Incorrect:**
+```
+Authorization: your_token_here
+```
+
+**✅ Correct:**
+```
+Authorization: Bearer your_token_here
+```
+
+---
+
 ## Error Reference
 
 | Error Message | Likely Cause | Solution |
@@ -207,6 +266,8 @@ cat src/.env
 | `ENOTFOUND` or DNS errors | Incorrect cluster URL | Verify MongoDB Atlas cluster URL |
 | `Authentication failed` | Wrong username/password | Check MongoDB Atlas credentials |
 | `Cannot read properties of undefined` | Missing environment variables | Ensure all required vars are set |
+| `JsonWebTokenError` | Invalid JWT token or secret | Check token format and secret keys |
+| `Unauthorized` | Missing or invalid authentication | Verify token in cookies/headers |
 
 ---
 
