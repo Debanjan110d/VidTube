@@ -201,6 +201,27 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     }
 })
 
+const changeCurrentUserPassword = asyncHandler(async (req, res) => {
+
+})
+
+const getCurrentUser = asyncHandler(async (req, res) => {
+
+
+})
+
+const updateAccountdetails = asyncHandler(async (req, res) => {
+
+})
+
+const updateUserAvatar = asyncHandler(async (req, res) => {
+
+})
+
+const updateUserCoverImage = asyncHandler(async (req, res) => {
+
+})
+
 
 export {
     registerUser,
