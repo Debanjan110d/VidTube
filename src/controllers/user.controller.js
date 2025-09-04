@@ -202,16 +202,38 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 })
 
 const changeCurrentUserPassword = asyncHandler(async (req, res) => {
+    const { oldPassword, newPassword } = req.body
 
+    const user = await User.findById(req.user?._id)
+
+    const isValidPassword = await user.isValidPassword(oldPassword)
+
+    if (!isValidPassword) {
+        throw new ApiError(401, "Incorrect current password")
+    }
+
+    user.password = newPassword
+    await user.save({ validateBeforeSave: false })
+    return res.status(200).json(new ApiResponse(200, "Password changed successfully"))
 })
 
 const getCurrentUser = asyncHandler(async (req, res) => {
 
-
+    res.status(200).json(new ApiResponse(200, "User found successfully", req.user, "Current User Details Fetched Successfully"))
 })
 
 const updateAccountdetails = asyncHandler(async (req, res) => {
-
+    const { fullname, email } = req.body
+    if (!fullname || !email) {
+        throw new ApiError(" 400", "Fullname and email are required");
+    }
+    User.findByIdAndUpdate(req.user?._id,
+        {
+            $set: {// $set → MongoDB operator to update specific fields without replacing the whole document.
+                fullname,
+                email
+            }
+        })
 })
 
 const updateUserAvatar = asyncHandler(async (req, res) => {

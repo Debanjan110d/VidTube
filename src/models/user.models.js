@@ -82,6 +82,7 @@ const userSchema = new Schema(// Schema is a constructor function that is used t
 // Next is the way to pass on your request from
 
 // one middleware to the next middleware, to the next middleware,
+// This is a prehook
 userSchema.pre("save", async function (next) {// Never use arrow function here  because we need the context many times 
 
 
