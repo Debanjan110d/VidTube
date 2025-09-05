@@ -233,14 +233,59 @@ const updateAccountdetails = asyncHandler(async (req, res) => {
                 fullname,
                 email
             }
-        })
+
+        },
+        { new: true }
+    ).select("-password -refreshToken")//So, "-password -refreshToken" means: "Get me the document(s), but make sure to remove the password field and the refreshToken field before you send them back."
+
+    res
+        .status(200)
+        .json(new ApiResponse(200, user, "Account details updated successfully"))
 })
 
 const updateUserAvatar = asyncHandler(async (req, res) => {
+    const avatar_local_path = req.file?.path
+    if (!avatar_local_path) {
+        throw new ApiError(400, "Avatar is required")
+    }
+    const avatar = await uploadOnCloudinary(avatar_local_path)
+    if (!avatar.url) {
+        throw new ApiError(400, "Avatar upload failed");
+    }
+    await User.findByIdAndUpdate(
+        req.user?._id,
+        {
+            $set: {// set is a command to update specific fields without replacing the whole document in mongodb
+                avatar: avatar.url
+            }
+        }, { new: true }).select("-password -refreshToken")
 
+    res
+        .status(200)
+        .json(new ApiResponse(200, user, "Avatar updated successfully"))
 })
 
 const updateUserCoverImage = asyncHandler(async (req, res) => {
+    const coverImage_local_path = req.file?.path
+    if (!coverImage_local_path) {
+        throw new ApiError(400, "Cover image is required")
+    }
+    const coverImage = await uploadOnCloudinary(coverImage_local_path)
+    if (!coverImage.url) {
+        throw new ApiError(400, "Cover image upload failed");
+    }
+    await User.findByIdAndUpdate(
+        req.user?._id,
+        {
+            $set: {// set is a command to update specific fields without replacing the whole document in mongodb
+                coverImage: coverImage.url
+            }
+        }, { new: true }).select("-password -refreshToken")
+
+    res
+        .status(200)
+        .json(new ApiResponse(200, user, "Cover image updated successfully"))
+
 
 })
 
@@ -249,5 +294,10 @@ export {
     registerUser,
     loginUser,
     refreshAccessToken,
-    logoutUser
+    logoutUser,
+    changeCurrentUserPassword,
+    getCurrentUser,
+    updateAccountdetails,
+    updateUserAvatar,
+    updateUserCoverImage
 }
