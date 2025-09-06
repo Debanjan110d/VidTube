@@ -1,6 +1,7 @@
 # VidTube
 
-A YouTube-inspired video platform built with Node.js, Express, and MongoDB.
+A YouTube-inspired video platform built with Node.js, Express, and MongoDB.  
+**Developed by Debanjan Dutta**
 
 ## 🚀 Quick Start
 
