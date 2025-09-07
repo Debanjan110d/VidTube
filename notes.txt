@@ -1856,3 +1856,151 @@
     - ✅ Implemented secure cookie options with httpOnly and environment-based secure flag
     - ✅ Multiple token source support: cookies, body, Authorization header
     - ✅ Proper middleware chaining with next() calls and error propagation
+40. MOngo db aggrigation pipeline :
+[
+  {
+    $match: {
+      isActive: true,
+    },
+  },
+  {
+    $count: 'isActiveUser'
+  }
+]
+this is a example which will give the count of active user
+IN the 1st stage $match is used to filter the data and the 2nd stage $count is used to count the filtered data
+
+After  taht if you o this :
+[
+  {
+    $group: {
+      _id: "$age",//or here you can use $gender that will show two types of gender like male and female
+      
+    }
+  }
+]
+
+this is show the groups of ages of the user s like 33,22,57 ....
+but With this its not possible to get the average of the age of the user data base 
+
+Now we can do this :
+[
+  {
+    $group: {
+      _id: null,// NOw we can add our accumulator in this 
+      // acumulator means your own custom field also acumulator can be adefault one taht is already seted up in the mongodb
+        averageAge:{
+        $avg:"$age"
+      }
+    }
+  }
+]
+the output will be like this :
+{
+  "_id": null,
+  "averageAge": 29.835
+}
+also we can make the groups seperate with genders like this :
+[
+  {
+    $group: {
+      _id: "$gender",
+      averageAge:{
+        $avg:"$age"
+      }
+    }
+  }
+]
+and the output will look like this :
+{
+  "_id": "male",
+  "averageAge": 29.851926977687626
+}
+{
+  "averageAge": 29.81854043392505,
+  "_id": "female"
+}
+#Now to get that is something common in the user data base we can do this :
+
+41. **MongoDB Aggregation - Grouping by Favorite Fruit Example**:
+
+   **Pipeline Structure**:
+   ```javascript
+   [
+     {
+       $group: {
+         _id: "$favoriteFruit",
+         count: {
+           $sum: 1
+         }
+       }
+     } 
+   ]
+   ```
+
+   **Pipeline Breakdown**:
+   
+   A) **$group Stage Explanation**:
+      - **Purpose**: Groups documents together based on a specified field value
+      - **_id Field**: Defines what to group by (in this case, the "favoriteFruit" field)
+      - **$favoriteFruit**: References the "favoriteFruit" field from each document
+      - **count Field**: Creates a new field that counts documents in each group
+      - **$sum: 1**: Adds 1 for each document in the group (counting mechanism)
+
+   B) **How the Grouping Works**:
+      1. MongoDB scans all documents in the collection
+      2. Groups documents that have the same "favoriteFruit" value together
+      3. For each group, counts how many documents belong to that group
+      4. Creates a result document for each unique fruit value
+
+   C) **Expected Output**:
+   ```javascript
+   {
+     "_id": "apple",
+     "count": 338
+   }
+   {
+     "_id": "banana", 
+     "count": 339
+   }
+   {
+     "_id": "strawberry",
+     "count": 323
+   }
+   ```
+
+   D) **Output Analysis**:
+      - **"_id" Field**: Shows the unique fruit values found in the database
+      - **"count" Field**: Shows how many users prefer each fruit
+      - **Results**: 338 users prefer apple, 339 prefer banana, 323 prefer strawberry
+      - **Total Users**: 338 + 339 + 323 = 1000 total users in this example
+
+   E) **Real-World Use Cases**:
+      - **User Analytics**: Count users by preferences, locations, age groups
+      - **E-commerce**: Group orders by product category, payment method
+      - **Social Media**: Count posts by tags, likes by user, comments by date
+      - **YouTube Clone**: Count videos by category, views by channel, subscribers by region
+
+   F) **Aggregation Pipeline Concepts**:
+      - **Stage-by-Stage Processing**: Each stage transforms data and passes it to the next
+      - **Document Transformation**: Input documents become grouped result documents
+      - **Field Referencing**: Use $ prefix to reference fields from original documents
+      - **Accumulator Operations**: $sum, $avg, $max, $min for calculations within groups
+
+   G) **Alternative Grouping Examples**:
+   ```javascript
+   // Group by gender and count users
+   { $group: { _id: "$gender", userCount: { $sum: 1 } } }
+   
+   // Group by age and find average income
+   { $group: { _id: "$age", avgIncome: { $avg: "$income" } } }
+   
+   // Group by city and count total orders
+   { $group: { _id: "$city", totalOrders: { $sum: "$orderCount" } } }
+   ```
+
+   H) **Performance Considerations**:
+      - **Indexing**: Create indexes on fields used in $group._id for faster grouping
+      - **Memory Usage**: Large datasets may require allowDiskUse: true option
+      - **Pipeline Order**: Place $match before $group to filter data early
+      - **Result Size**: Consider $limit after $group if only top results needed
