@@ -2424,4 +2424,196 @@ and the output will look like this :
       4. **Set reasonable limits** to prevent performance issues
       5. **Index sort fields** for better performance with large collections
 
+44. **MongoDB Aggregation - Finding the Most Popular Item**:
+
+   **Pipeline Structure to Find Single Most Popular Fruit**:
+   ```javascript
+   [
+     {
+       $group: {
+         _id: "$favoriteFruit",
+         count: { $sum: 1 }
+       }
+     },
+     {
+       $sort: {
+         count: -1
+       }
+     },
+     {
+       $limit: 1
+     }
+   ]
+   ```
+
+   **Expected Output (Single Most Popular Fruit)**:
+   ```javascript
+   {
+     "_id": "banana",
+     "count": 339
+   }
+   ```
+
+   **Pipeline Breakdown**:
+   
+   A) **Stage 1 - $group Stage**:
+      - Groups documents by "favoriteFruit" field
+      - Counts occurrences using $sum: 1
+      - Creates one document per unique fruit
+   
+   B) **Stage 2 - $sort Stage**:
+      - Sorts by count in descending order
+      - Most popular fruit appears first
+      - Least popular fruit appears last
+   
+   C) **Stage 3 - $limit: 1**:
+      - **Purpose**: Returns only the first document (the winner)
+      - **Result**: Single document with the most popular fruit
+      - **Use Case**: Finding the absolute top performer
+
+   **Key Concepts**:
+
+   A) **Finding the Winner Pattern**:
+      ```javascript
+      // Template for "most popular" queries
+      [
+        { $group: { _id: "$fieldName", count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+        { $limit: 1 }  // Get only the winner
+      ]
+      ```
+
+   B) **Real-World Applications**:
+      
+      1. **Most Popular Video Category**:
+         ```javascript
+         [
+           { $group: { _id: "$category", videoCount: { $sum: 1 } } },
+           { $sort: { videoCount: -1 } },
+           { $limit: 1 }
+         ]
+         ```
+         Output: `{ "_id": "gaming", "videoCount": 1250 }`
+      
+      2. **Top Performing Channel**:
+         ```javascript
+         [
+           { $group: { _id: "$channelId", totalViews: { $sum: "$views" } } },
+           { $sort: { totalViews: -1 } },
+           { $limit: 1 }
+         ]
+         ```
+         Output: `{ "_id": "channel123", "totalViews": 50000000 }`
+      
+      3. **Most Active User**:
+         ```javascript
+         [
+           { $group: { _id: "$userId", activities: { $sum: 1 } } },
+           { $sort: { activities: -1 } },
+           { $limit: 1 }
+         ]
+         ```
+         Output: `{ "_id": "user456", "activities": 847 }`
+
+   C) **Comparison with Multiple Results**:
+      
+      **Get Top 1 (Single Winner)**:
+      ```javascript
+      { $limit: 1 }
+      // Returns: Single document
+      ```
+      
+      **Get Top 3 (Podium)**:
+      ```javascript
+      { $limit: 3 }
+      // Returns: Array of 3 documents
+      ```
+      
+      **Get All (Complete Ranking)**:
+      ```javascript
+      // No $limit stage
+      // Returns: All grouped results, sorted
+      ```
+
+   D) **YouTube Clone Specific Examples**:
+      
+      1. **Most Watched Video**:
+         ```javascript
+         [
+           { $sort: { views: -1 } },
+           { $limit: 1 }
+         ]
+         ```
+         Result: The single most viewed video
+      
+      2. **Most Liked Comment**:
+         ```javascript
+         [
+           { $sort: { likes: -1 } },
+           { $limit: 1 }
+         ]
+         ```
+         Result: Comment with highest like count
+      
+      3. **Most Subscribed Channel**:
+         ```javascript
+         [
+           { $group: { _id: "$channelId", subscribers: { $sum: 1 } } },
+           { $sort: { subscribers: -1 } },
+           { $limit: 1 }
+         ]
+         ```
+         Result: Channel with most subscribers
+
+   E) **Performance Considerations for Single Result Queries**:
+      
+      1. **Index Optimization**:
+         - Create descending index on sort field: `{ count: -1 }`
+         - MongoDB can stop after finding first result
+         - Extremely fast for large collections
+      
+      2. **Early Termination**:
+         ```javascript
+         // MongoDB optimizes this pattern
+         [
+           { $sort: { timestamp: -1 } },  // Recent first
+           { $limit: 1 }                  // Stop after first
+         ]
+         ```
+      
+      3. **Memory Efficiency**:
+         - Minimal memory usage (single document)
+         - Fast network transfer
+         - Ideal for dashboard widgets and quick stats
+
+   F) **Alternative Approaches for Finding Maximum**:
+      
+      1. **Using $max Accumulator**:
+         ```javascript
+         [
+           { $group: { _id: null, maxCount: { $max: "$count" } } }
+         ]
+         // Returns: { "_id": null, "maxCount": 339 }
+         // Note: Doesn't tell you which fruit has max count
+         ```
+      
+      2. **Using $sort + $limit (Recommended)**:
+         ```javascript
+         [
+           { $sort: { count: -1 } },
+           { $limit: 1 }
+         ]
+         // Returns: Complete document with both fruit name and count
+         ```
+
+   G) **Best Practices for "Winner" Queries**:
+      
+      1. **Always sort before limiting** for predictable results
+      2. **Use appropriate indexes** on sort fields
+      3. **Consider ties** - what if multiple items have same top value?
+      4. **Add secondary sort** for consistent tie-breaking:
+         ```javascript
+         { $sort: { count: -1, _id: 1 } }  // Break ties alphabetically
+         ```
+
 
