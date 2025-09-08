@@ -1895,6 +1895,35 @@ Now we can do this :
     }
   }
 ]
+
+**Expected Output for Average Age Calculation**:
+```javascript
+{
+  "_id": null,
+  "averageAge": 29.835
+}
+```
+
+**Complete Pipeline Example**:
+```javascript
+[
+  {
+    $group: {
+      _id: null,
+      averageAge: {
+        $avg: "$age"
+      }
+    }
+  }
+]
+```
+
+**Key Points**:
+- **_id: null**: Groups all documents together (no grouping by specific field)
+- **$avg: "$age"**: Calculates average of all age values in the collection
+- **averageAge**: Custom field name for the calculated average
+- **Result**: Single document with overall average age of all users
+
 the output will be like this :
 {
   "_id": null,
@@ -2004,3 +2033,395 @@ and the output will look like this :
       - **Memory Usage**: Large datasets may require allowDiskUse: true option
       - **Pipeline Order**: Place $match before $group to filter data early
       - **Result Size**: Consider $limit after $group if only top results needed
+
+42. **MongoDB Aggregation - Sorting Results Example**:
+
+   **Pipeline Structure with Sorting**:
+   ```javascript
+   [
+     {
+       $group: {
+         _id: "$favoriteFruit",
+         count: { $sum: 1 }
+       }
+     },
+     {
+       $sort: { count: -1 }
+     }
+   ]
+   ```
+
+   **Pipeline Breakdown**:
+   
+   A) **Stage 1 - $group Stage**:
+      - Groups documents by "favoriteFruit" field
+      - Counts documents in each group using $sum: 1
+      - Creates result documents with _id and count fields
+   
+   B) **Stage 2 - $sort Stage**:
+      - **Purpose**: Sorts the grouped results in a specific order
+      - **{ count: -1 }**: Sorts by the "count" field in descending order
+      - **-1**: Descending order (highest to lowest)
+      - **1**: Would be ascending order (lowest to highest)
+
+   C) **Expected Output (Sorted by Count - Highest First)**:
+   ```javascript
+   {
+     "_id": "banana",
+     "count": 339
+   }
+   {
+     "_id": "apple", 
+     "count": 338
+   }
+   {
+     "_id": "strawberry",
+     "count": 323
+   }
+   ```
+
+   D) **Sort Options and Examples**:
+      
+      1. **Sort by Count (Descending - Most Popular First)**:
+         ```javascript
+         { $sort: { count: -1 } }
+         ```
+         Result: banana (339) → apple (338) → strawberry (323)
+      
+      2. **Sort by Count (Ascending - Least Popular First)**:
+         ```javascript
+         { $sort: { count: 1 } }
+         ```
+         Result: strawberry (323) → apple (338) → banana (339)
+      
+      3. **Sort by Fruit Name (Alphabetical)**:
+         ```javascript
+         { $sort: { _id: 1 } }
+         ```
+         Result: apple → banana → strawberry
+      
+      4. **Multiple Sort Criteria**:
+         ```javascript
+         { $sort: { count: -1, _id: 1 } }
+         ```
+         First by count (desc), then by name (asc) for ties
+
+   E) **Real-World Sorting Applications**:
+      - **YouTube Clone**: Sort videos by view count, upload date, likes
+      - **E-commerce**: Sort products by popularity, price, rating
+      - **Social Media**: Sort posts by engagement, recency, relevance
+      - **Analytics**: Sort metrics by performance, date, category
+
+   F) **Advanced Sorting Techniques**:
+      
+      1. **Top N Results with $limit**:
+         ```javascript
+         [
+           { $group: { _id: "$category", count: { $sum: 1 } } },
+           { $sort: { count: -1 } },
+           { $limit: 5 }  // Get top 5 categories only
+         ]
+         ```
+      
+      2. **Sort with Computed Fields**:
+         ```javascript
+         [
+           { $group: { _id: "$product", totalRevenue: { $sum: "$price" } } },
+           { $sort: { totalRevenue: -1 } }
+         ]
+         ```
+      
+      3. **Date-based Sorting**:
+         ```javascript
+         { $sort: { createdAt: -1 } }  // Most recent first
+         ```
+
+   G) **Performance Optimization for Sorting**:
+      
+      1. **Index Support**:
+         - Create indexes on fields used in $sort for better performance
+         - MongoDB can use indexes to avoid in-memory sorting
+         - Example: `db.collection.createIndex({ count: -1 })`
+      
+      2. **Memory Limitations**:
+         - $sort stage has 100MB memory limit by default
+         - Use `allowDiskUse: true` for large datasets
+         - Better to filter with $match before sorting
+      
+      3. **Pipeline Optimization**:
+         ```javascript
+         // GOOD: Filter first, then group and sort
+         [
+           { $match: { isActive: true } },    // Reduce dataset first
+           { $group: { _id: "$category", count: { $sum: 1 } } },
+           { $sort: { count: -1 } }
+         ]
+         
+         // AVOID: Sorting large datasets without filtering
+         [
+           { $group: { _id: "$category", count: { $sum: 1 } } },
+           { $sort: { count: -1 } },
+           { $match: { count: { $gte: 10 } } }  // Filter after grouping
+         ]
+         ```
+
+   H) **Common Sorting Patterns**:
+      
+      1. **Leaderboard/Rankings**:
+         ```javascript
+         // Top users by activity
+         [
+           { $group: { _id: "$userId", activity: { $sum: "$actionCount" } } },
+           { $sort: { activity: -1 } },
+           { $limit: 10 }
+         ]
+         ```
+      
+      2. **Trend Analysis**:
+         ```javascript
+         // Monthly user growth
+         [
+           { $group: { _id: { month: "$createdMonth" }, newUsers: { $sum: 1 } } },
+           { $sort: { "_id.month": 1 } }  // Chronological order
+         ]
+         ```
+      
+      3. **Category Analytics**:
+         ```javascript
+         // Most popular video categories
+         [
+           { $group: { _id: "$category", views: { $sum: "$viewCount" } } },
+           { $sort: { views: -1 } }
+         ]
+         ```
+
+   I) **Sort Direction Reference**:
+      - **-1 (Descending)**: 100 → 50 → 10 (highest to lowest)
+      - **1 (Ascending)**: 10 → 50 → 100 (lowest to highest)
+      - **Text Fields**: Alphabetical (A-Z with 1, Z-A with -1)
+      - **Dates**: Recent to old (-1), old to recent (1)
+
+43. **MongoDB Aggregation - Limiting Results with $limit**:
+
+   **Pipeline Structure with Limit**:
+   ```javascript
+   [
+     {
+       $group: {
+         _id: "$favoriteFruit",
+         count: { $sum: 1 }
+       }
+     },
+     {
+       $sort: { count: -1 }
+     },
+     {
+       $limit: 2
+     }
+   ]
+   ```
+
+   **Pipeline Breakdown**:
+   
+   A) **Stage 1 - $group Stage**:
+      - Groups documents by "favoriteFruit" field
+      - Counts documents in each group using $sum: 1
+   
+   B) **Stage 2 - $sort Stage**:
+      - Sorts results by count in descending order (highest first)
+      - Ensures we get the most popular fruits at the top
+   
+   C) **Stage 3 - $limit Stage**:
+      - **Purpose**: Restricts the number of documents returned
+      - **$limit: 2**: Returns only the first 2 documents from the sorted results
+      - **Order Matters**: $limit is applied AFTER sorting, so we get top 2
+
+   **Expected Output (Top 2 Most Popular Fruits)**:
+   ```javascript
+   {
+     "_id": "banana",
+     "count": 339
+   }
+   {
+     "_id": "apple",
+     "count": 338
+   }
+   ```
+
+   **Key Concepts**:
+
+   A) **Pipeline Order Importance**:
+      ```javascript
+      // CORRECT ORDER: Group → Sort → Limit
+      [
+        { $group: { _id: "$fruit", count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+        { $limit: 2 }
+      ]
+      
+      // WRONG ORDER: Group → Limit → Sort (gives random results)
+      [
+        { $group: { _id: "$fruit", count: { $sum: 1 } } },
+        { $limit: 2 },
+        { $sort: { count: -1 } }
+      ]
+      ```
+
+   B) **$limit vs $skip Combination**:
+      ```javascript
+      // Pagination: Skip first 5, take next 10 (like page 2 with 10 items per page)
+      [
+        { $group: { _id: "$category", count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+        { $skip: 5 },
+        { $limit: 10 }
+      ]
+      ```
+
+   C) **Real-World $limit Applications**:
+      
+      1. **Top N Rankings**:
+         ```javascript
+         // Top 5 most viewed videos
+         [
+           { $sort: { views: -1 } },
+           { $limit: 5 }
+         ]
+         ```
+      
+      2. **Latest Content**:
+         ```javascript
+         // Most recent 10 posts
+         [
+           { $sort: { createdAt: -1 } },
+           { $limit: 10 }
+         ]
+         ```
+      
+      3. **Featured Content**:
+         ```javascript
+         // Top 3 highest rated products
+         [
+           { $match: { rating: { $gte: 4.5 } } },
+           { $sort: { rating: -1, reviewCount: -1 } },
+           { $limit: 3 }
+         ]
+         ```
+
+   D) **Performance Benefits of $limit**:
+      
+      1. **Memory Efficiency**:
+         - Reduces data transfer between MongoDB and application
+         - Lower memory usage for processing results
+         - Faster response times for API endpoints
+      
+      2. **Network Optimization**:
+         - Less data sent over the network
+         - Improved user experience with faster loading
+         - Reduced bandwidth costs
+      
+      3. **Query Optimization**:
+         ```javascript
+         // MongoDB can optimize when $limit is early in pipeline
+         [
+           { $match: { isActive: true } },     // Filter first
+           { $sort: { priority: -1 } },        // Sort by priority
+           { $limit: 100 },                    // Limit early for optimization
+           { $group: { _id: "$category", count: { $sum: 1 } } }
+         ]
+         ```
+
+   E) **Common Limit Patterns**:
+      
+      1. **Dashboard Analytics** (Top 5 items):
+         ```javascript
+         // Most active users this month
+         [
+           { $match: { lastActive: { $gte: startOfMonth } } },
+           { $group: { _id: "$userId", sessions: { $sum: 1 } } },
+           { $sort: { sessions: -1 } },
+           { $limit: 5 }
+         ]
+         ```
+      
+      2. **Recommendation Systems** (Similar items):
+         ```javascript
+         // Top 10 related videos
+         [
+           { $match: { category: "technology", _id: { $ne: currentVideoId } } },
+           { $sort: { views: -1, rating: -1 } },
+           { $limit: 10 }
+         ]
+         ```
+      
+      3. **Search Results** (Paginated):
+         ```javascript
+         // Search with pagination (page 3, 20 items per page)
+         [
+           { $match: { title: { $regex: searchTerm, $options: "i" } } },
+           { $sort: { relevanceScore: -1, createdAt: -1 } },
+           { $skip: 40 },     // (page - 1) * pageSize = (3-1) * 20
+           { $limit: 20 }     // Items per page
+         ]
+         ```
+
+   F) **YouTube Clone Use Cases**:
+      
+      1. **Trending Videos** (Top 50):
+         ```javascript
+         [
+           { $match: { uploadDate: { $gte: last7Days } } },
+           { $sort: { views: -1, likes: -1 } },
+           { $limit: 50 }
+         ]
+         ```
+      
+      2. **Channel's Popular Videos** (Top 12):
+         ```javascript
+         [
+           { $match: { channelId: specificChannelId } },
+           { $sort: { views: -1 } },
+           { $limit: 12 }
+         ]
+         ```
+      
+      3. **New Uploads Feed** (Latest 20):
+         ```javascript
+         [
+           { $match: { subscribedChannels: { $in: userSubscriptions } } },
+           { $sort: { uploadDate: -1 } },
+           { $limit: 20 }
+         ]
+         ```
+
+   G) **$limit with $facet for Multiple Top Lists**:
+      ```javascript
+      [
+        {
+          $facet: {
+            topByViews: [
+              { $sort: { views: -1 } },
+              { $limit: 5 }
+            ],
+            topByLikes: [
+              { $sort: { likes: -1 } },
+              { $limit: 5 }
+            ],
+            topByComments: [
+              { $sort: { commentCount: -1 } },
+              { $limit: 5 }
+            ]
+          }
+        }
+      ]
+      ```
+
+   H) **Best Practices for $limit**:
+      
+      1. **Always combine with $sort** for predictable results
+      2. **Use early in pipeline** when possible for optimization
+      3. **Consider pagination** with $skip for large datasets
+      4. **Set reasonable limits** to prevent performance issues
+      5. **Index sort fields** for better performance with large collections
+
+
