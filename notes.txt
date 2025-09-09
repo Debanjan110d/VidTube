@@ -2616,4 +2616,14 @@ and the output will look like this :
          { $sort: { count: -1, _id: 1 } }  // Break ties alphabetically
          ```
 
-
+[
+  {
+    $group:{
+      _id: "gender"// this is an expression
+      genderCount:{// This is  a field
+      $sum:1 // This is a accumulator 
+      
+      }
+    }
+  }
+]  
