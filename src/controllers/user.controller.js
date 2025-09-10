@@ -290,6 +290,38 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
 })
 
 
+const getUserChannelProfile = asyncHandler(async (req, res) => {
+    const { username } = req.params// params is an object that contains the route parameters passed in the URL.
+
+
+    if (!username?.trim()) {
+        throw new ApiError(400, "Username is required")
+    }
+
+    const channel = await User.aggregate(
+        [
+            {
+                $match: {
+                    username: username?.toLowerCase() // Convert username to lowercase for case-insensitive search
+                }
+            },
+            {
+                $lookup: {
+                    from: "subscriptions",
+                    localField: "_id",
+                    foreignField: "channel",
+                    as: "subscribers"
+                }
+            },
+        ]
+    )
+
+})
+
+const getWatchHistory = asyncHandler(async (req, res) => {
+
+})
+
 export {
     registerUser,
     loginUser,
