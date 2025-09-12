@@ -338,13 +338,39 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
                 }
 
 
+            },
+            {
+                // Project only the necessary data
+                $project: {
+                    fullname: 1,
+                    username: 1,
+                    avatar: 1,
+                    subscribersCount: 1,
+                    channelSubscribersCount: 1,
+                    isSubscribed: 1,
+                    email: 1
+
+                }
             }
         ]
     )
 
+    if (!channel?.length) {
+        throw new ApiError(404, "Channel Not Found");
+    }
+    return res
+        .status(200)
+        .json(new ApiResponse(
+            200,
+            channel[0],// for that poor frontend guy
+            "Channel profile fteched sucessfully"
+        ))
+
 })
 
 const getWatchHistory = asyncHandler(async (req, res) => {
+
+    const user = await User.findById(req)
 
 })
 
