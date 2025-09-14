@@ -1,9 +1,8 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { ApiError } from "../utils/apiError.js";
+import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.models.js";
 import { upload_cloudinary } from "../utils/cloudinary.js";
-import { ApiResponse } from "../utils/apiResponse.js"
-import { connection } from "mongoose";
+import { ApiResponse } from "../utils/ApiResponse.js"
 import jwt from "jsonwebtoken";
 
 
@@ -24,7 +23,7 @@ const generateAccessToken_And_RefreshToken = async (userId) => {
 };
 
 const registerUser = asyncHandler(async (req, res) => {
-    //TODO
+
 
     const { fullname, email, username, password } = req.body
 
