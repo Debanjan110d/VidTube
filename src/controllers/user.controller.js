@@ -374,7 +374,7 @@ const getWatchHistory = asyncHandler(async (req, res) => {
             $match: {
                 // _id: req.user?._id we can not do this mind that 
                 //TODO: Find out why
-                _id: new mongoose.Types.ObjectId(req.user?._id)// Sometimes you will find this object is depricated so use this new mongoose.Types.ObjectId(req.user?._id)
+                _id: mongoose.Types.ObjectId(req.user?._id)// Sometimes you will find this object is depricated so use this mongoose.Types.ObjectId(req.user?._id)
             }
         },
         {
