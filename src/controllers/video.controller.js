@@ -4,7 +4,7 @@ import { User } from "../models/user.model.js"
 import { ApiError } from "../utils/ApiError.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
-import { uploadOnCloudinary } from "../utils/cloudinary.js"
+import { upload_cloudinary, delete_from_cloudinary } from "../utils/cloudinary.js"
 
 const getAllVideos = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10, query, sortBy = "createdAt", sortType = "desc", userId } = req.query
@@ -26,7 +26,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
         if (!isValidObjectId(userId)) {
             throw new ApiError(400, "Invalid user ID");
         }
-        matchConditions.owner = new mongoose.Types.ObjectId(userId);
+        matchConditions.owner = mongoose.Types.ObjectId(userId);
     }
 
     // Build sort object - default random-ish (by creation time)
@@ -56,8 +56,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
                     {
                         $project: {
                             username: 1,
-                            "avatar.url": 1,
-                            fullName: 1
+                            "avatar.url": 1
                         }
                     }
                 ]
@@ -135,8 +134,8 @@ const publishAVideo = asyncHandler(async (req, res) => {
     }
 
     // Upload to Cloudinary - THIS IS WHERE YOU UPLOAD TO CLOUDINARY
-    const videoFile = await uploadOnCloudinary(videoFileLocalPath)
-    const thumbnail = await uploadOnCloudinary(thumbnailLocalPath)
+    const videoFile = await upload_cloudinary(videoFileLocalPath)
+    const thumbnail = await upload_cloudinary(thumbnailLocalPath)
 
     if (!videoFile) {
         throw new ApiError(400, "Video upload to Cloudinary failed")
@@ -163,7 +162,7 @@ const publishAVideo = asyncHandler(async (req, res) => {
         isPublished: false // Draft by default
     })
 
-    const createdVideo = await Video.findById(video._id).populate("owner", "username avatar fullName")
+    const createdVideo = await Video.findById(video._id).populate("owner", "username avatar")
 
     if (!createdVideo) {
         throw new ApiError(500, "Something went wrong while uploading video")
@@ -176,22 +175,204 @@ const publishAVideo = asyncHandler(async (req, res) => {
 
 const getVideoById = asyncHandler(async (req, res) => {
     const { videoId } = req.params
-    //TODO: get video by id
+
+    // Validate videoId
+    if (!isValidObjectId(videoId)) {
+        throw new ApiError(400, "Invalid video ID")
+    }
+
+    // Aggregate video with owner details and increment views
+    const video = await Video.aggregate([
+        {
+            $match: {
+                _id: new mongoose.Types.ObjectId(videoId),
+                isPublished: true
+            }
+        },
+        {
+            $lookup: {
+                from: "users",
+                localField: "owner",
+                foreignField: "_id",
+                as: "ownerDetails",
+                pipeline: [
+                    {
+                        $project: {
+                            username: 1,
+                            "avatar.url": 1
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            $addFields: {
+                ownerDetails: {
+                    $first: "$ownerDetails"
+                }
+            }
+        }
+    ])
+
+    if (!video?.length) {
+        throw new ApiError(404, "Video not found")
+    }
+
+    // Increment views
+    await Video.findByIdAndUpdate(videoId, {
+        $inc: {
+            views: 1
+        }
+    })
+
+    // Add to user's watch history if logged in
+    if (req.user) {
+        await User.findByIdAndUpdate(req.user._id, {
+            $addToSet: {
+                watchHistory: videoId
+            }
+        })
+    }
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, video[0], "Video details fetched successfully"))
 })
 
 const updateVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params
-    //TODO: update video details like title, description, thumbnail
+    const { title, description } = req.body
 
+    // Validate videoId
+    if (!isValidObjectId(videoId)) {
+        throw new ApiError(400, "Invalid video ID")
+    }
+
+    // Find video and check ownership
+    const video = await Video.findById(videoId)
+    if (!video) {
+        throw new ApiError(404, "Video not found")
+    }
+
+    if (video.owner.toString() !== req.user._id.toString()) {
+        throw new ApiError(403, "You can only update your own videos")
+    }
+
+    // Prepare update object
+    const updateFields = {}
+
+    if (title && title.trim() !== "") {
+        updateFields.title = title.trim()
+    }
+
+    if (description && description.trim() !== "") {
+        updateFields.description = description.trim()
+    }
+
+    // Handle thumbnail update if provided
+    if (req.file) {
+        const thumbnailLocalPath = req.file.path
+        const thumbnail = await upload_cloudinary(thumbnailLocalPath)
+
+        if (!thumbnail) {
+            throw new ApiError(400, "Thumbnail upload failed")
+        }
+
+        // Delete old thumbnail from cloudinary
+        if (video.thumbnail?.public_id) {
+            await delete_from_cloudinary(video.thumbnail.public_id)
+        }
+
+        updateFields.thumbnail = {
+            url: thumbnail.url,
+            public_id: thumbnail.public_id
+        }
+    }
+
+    // Update video
+    const updatedVideo = await Video.findByIdAndUpdate(
+        videoId,
+        { $set: updateFields },
+        { new: true }
+    ).populate("owner", "username avatar")
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, updatedVideo, "Video updated successfully"))
 })
 
 const deleteVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params
-    //TODO: delete video
+
+    // Validate videoId
+    if (!isValidObjectId(videoId)) {
+        throw new ApiError(400, "Invalid video ID")
+    }
+
+    // Find video and check ownership
+    const video = await Video.findById(videoId)
+    if (!video) {
+        throw new ApiError(404, "Video not found")
+    }
+
+    if (video.owner.toString() !== req.user._id.toString()) {
+        throw new ApiError(403, "You can only delete your own videos")
+    }
+
+    // Delete video file from cloudinary
+    if (video.videoFile?.public_id) {
+        await delete_from_cloudinary(video.videoFile.public_id)
+    }
+
+    // Delete thumbnail from cloudinary
+    if (video.thumbnail?.public_id) {
+        await delete_from_cloudinary(video.thumbnail.public_id)
+    }
+
+    // Delete video from database
+    await Video.findByIdAndDelete(videoId)
+
+    // Remove from all users' watch history
+    await User.updateMany(
+        { watchHistory: videoId },
+        { $pull: { watchHistory: videoId } }
+    )
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, {}, "Video deleted successfully"))
 })
 
 const togglePublishStatus = asyncHandler(async (req, res) => {
     const { videoId } = req.params
+
+    // Validate videoId
+    if (!isValidObjectId(videoId)) {
+        throw new ApiError(400, "Invalid video ID")
+    }
+
+    // Find video and check ownership
+    const video = await Video.findById(videoId)
+    if (!video) {
+        throw new ApiError(404, "Video not found")
+    }
+
+    if (video.owner.toString() !== req.user._id.toString()) {
+        throw new ApiError(403, "You can only modify your own videos")
+    }
+
+    // Toggle publish status
+    const updatedVideo = await Video.findByIdAndUpdate(
+        videoId,
+        { $set: { isPublished: !video.isPublished } },
+        { new: true }
+    ).populate("owner", "username avatar")
+
+    const message = updatedVideo.isPublished ? "Video published successfully" : "Video unpublished successfully"
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, updatedVideo, message))
 })
 
 export {

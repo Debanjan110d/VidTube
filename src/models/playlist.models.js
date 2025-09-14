@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
 // Playlist schema - groups multiple videos under a single user-owned playlist
 // Follows the style used in your User and Video models
@@ -80,5 +81,7 @@ const playlistSchema = new Schema(
 // this index will improve performance on queries that filter playlists by owner and privacy
 // e.g. finding all public playlists for a specific user
 playlistSchema.index({ owner: 1, privacy: 1 });
+
+playlistSchema.plugin(mongooseAggregatePaginate);
 
 export const Playlist = mongoose.model('Playlist', playlistSchema);

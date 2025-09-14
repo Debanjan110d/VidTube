@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import User from "../models/user.models.js";
-import { ApiError } from "../utils/apiError.js";
+import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 // we can directly export this too like this : export const verifyJWT = asyncHandler(async (req, res, next) => {})
 const verifyJWT = asyncHandler(async (req, _, next) => {// There is no use of response here so its good to use _ instead of res

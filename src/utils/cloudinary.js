@@ -67,4 +67,4 @@ const delete_from_cloudinary = async (public_id) => {
 }
 
 
-export { upload_cloudinary }
+export { upload_cloudinary, delete_from_cloudinary }
